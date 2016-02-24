@@ -13,43 +13,57 @@ source("utilities.R")
 
 shinyServer(function(input, output,session) {
   
-  ex <- reactiveValues(results = NULL, cur = 1, total=0)
+  ex <- reactiveValues(active=1,results = NULL, total=0)
   
-  # demo data  
+  # demo data
   
-  demo_data <- reactive({
-    data <- getData(input$theme,input$student_id)
-    mydata <<- data
-    data
+  # set seed
+  seed <- observe({
+    set.seed(input$student_id)
   })
   
-  # ei toimi
-  observeEvent(input[["start"]], {
-    attach(mydata, pos=2, warn.conflicts = F)
+  # sample a personal dataset
+  sampled_data <- reactive({
+    mydata <<- data[sample(1:nrow(data),100),]
+    mydata
+  })
+  
+  # set colnames based on theme choice
+  col_names <- observe({
+    names <- paste(input$theme,1:ncol(sampled_data()))
+    colnames(mydata) <- names
+    colnames(data) <- names
+  })
+  
+  
+  #  Demos
+  
+  # active demo
+  active <- observe({
+    ex$active <- as.numeric(input$demonav)
+  })
+  
+  # filepath to knit the active demo to
+  demofilepath <- reactive({
+    paste0("knitted/demo",ex$active,".md")
+  })
+  
+  # knit the active demo
+  knitDemo <- observe({
+    knit(rmdfiles[ex$active], output=demofilepath(),quiet = T)
+  })
+  
+  # render all demos
+  
+  for(d in 1:ndemos) {
+    
+    output[[paste0("demo",d)]] <- renderUI({
+      if(file.exists(demofilepath())) {
+      withMathJax(includeMarkdown(demofilepath()))
+      }
     })
+  }
   
-  # navigation
-  
-  observeEvent(input[["next"]], {
-    cur <- ex$cur +1
-    ex$cur <- min(length(rmdfiles), cur)
-  })
-  
-  observeEvent(input[["prev"]],{
-    cur <- ex$cur -1
-    ex$cur <- max(1, cur)
-  })
-  
-  # single demo
-  # move to ui and use sapply + do.call
-  demoUI <- reactive({
-    trigger <- demo_data()
-    knit(rmdfiles[[ex$cur]], quiet = T)
-    withMathJax(includeMarkdown(paste0("demo",ex$cur,".md")))
-  })
-  output$demo <- renderUI({
-    demoUI()
-  })
   
   # React to the code inputs
   
@@ -70,7 +84,6 @@ shinyServer(function(input, output,session) {
     code <- isolate(code())
     output[[type]] <- switch(type,
                              "plot" =  renderPlot({eval(code,envir=.GlobalEnv)}),
-                             "table" = renderTable({eval(code,envir=.GlobalEnv)}),
                              "text" =  renderPrint({eval(code,envir=.GlobalEnv)})
     )  
   })

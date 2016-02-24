@@ -1,0 +1,13 @@
+### Welcome!  
+  
+In this tutorial you will use the R language to summarise and visualize basic variables. there are ´r length(demoTabs)´ demos, each containing an exercise.
+
+#### Basic information about R
+ 
+Each demo contains examples and an exercise. In the exercises you will get to instantly apply the examples given, using your own personal dataset. This dataset is called mydata. mydata is a data frame containing your variables. Don't worry if the term data frame sounds strange, it is merely a kind of table.
+
+During each exercise, you will perform a small task using the R program. In R you operate on * objects* using *functions*. You can store information... more basic info.
+
+```{r}
+ans <- "my answer"
+```
