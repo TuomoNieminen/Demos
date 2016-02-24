@@ -1,0 +1,46 @@
+
+### Use your head()
+
+<br>
+
+Welcome!  
+
+In this tutorial you will use the R language to summarise and visualize basic variables. You will be using a data set which contains the variables
+`r colnames(mydata)`.  
+
+These variables are saved together in a single data frame object called mydata. Don't worry if the term data frame sounds strange, it is only a kind of table. You can for example see the first three rows of this table like so:
+  
+```{r}
+head(x=mydata, n=3)
+```
+
+Here we called the function `head()`, which wants us to give it inside the parenthesis two specific things: `x` and `n`. these are the arguments of the function. Once we told `head()` that `x=mydata` and `n=3`, it knew that we wanted the first three rows of mydata.
+
+In R you can also save any function output by using the assign operator `<-`. Below we define our own new variable mydata_top3 by saving the output of `head()` to it.
+
+```{r}
+mydata_top3 <- head(mydata, 3)
+```
+
+Notice that when we gave `head()` the information about `x` and `n` in the right order, we didn't have to explicitly state which is which.  
+
+Now that we have our variable saved, we can acces that variable later and for example print it by typing it's name.
+
+```{r}
+mydata_top3
+```
+
+  
+### Exercise 1
+
+<br>
+
+Let's try it! Use `head()` to display the first 10 rows of mydata. Then save this output to a new variable called `ans`.  
+
+Once you have received a green feedback, click Next to proceed to the next part of the tutorial, where you will take a closer look at your variables!
+
+```{r, include=FALSE, echo=FALSE}
+# correct answer. echo=FALSE means that this code will not be displayed.
+dontlook[[1]] <<- head(mydata,10)
+```
+
