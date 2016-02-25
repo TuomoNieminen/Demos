@@ -1,4 +1,3 @@
-# Introstat exercises - type 2
 
 # Server logic
 # the server handles:
@@ -13,121 +12,130 @@ source("utilities.R")
 
 shinyServer(function(input, output, session) {
   
-  ex <- reactiveValues(active=1,results = NULL, total=0)
+  ex <- reactiveValues(cur=1,feedback = "",env = new.env(),results = NULL, total=0)
+  util <- reactiveValues(active=1,curinfo=1)
   
   # demo data
   
-  # set seed
-  seed <- observe({
+  sample_data <- observe({
+    # sample a personal dataset
     set.seed(input$student_id)
+    sample <- data[sample(1:nrow(data),100),]
+    
+    # colnames based on theme choice
+    colnames(sample) <- paste(input$theme,1:ncol(sample))
+    mydata <<- sample
   })
   
-  # sample a personal dataset
-  sampled_data <- reactive({
-    mydata <<- data[sample(1:nrow(data),100),]
-    mydata
-  })
-  
-  # set colnames based on theme choice
-  col_names <- observe({
-    names <- paste(input$theme,1:ncol(sampled_data()))
-    colnames(mydata) <- names
-    colnames(data) <- names
-  })
   
   
   #  Demos
   
-  # which nav is the active one
+  # which nav is the active one and what is the current exercise
   active <- observe({
-    ex$active <- as.numeric(input$intro_nav)
+    cur_nav <- as.numeric(input$intro_nav)
+    util$active <- cur_nav
+    ex$cur <- cur_nav - ninfo
   },priority=0)
   
-  # filepath where to knit the active file
-  filepath <- reactive({
-    paste0("temp_mdfile",ex$active,".md")
-  })
   
-  # knit the active file
-  knitFile <- observe({
-    knit(files[ex$active], output=filepath(),quiet = T)
+  
+  # knit the demos
+  knitDemos <- observe({
+    trigger <- input$theme
+    mapply(knit,demofiles,tmp_demos,MoreArgs=list(quiet=T))
   },priority=1)
   
-  # check if the active file is knitted
-  isKnitted <- reactive({
-    file.exists(filepath())
+  # check if the active demo is knitted
+  demoKnitted <- reactive({
+    file.exists(tmp_demos[ex$cur])
   })
   
   # render all infos
   for(i in 1:ninfo) {
     
-    # render the active demo md if it is knitted
+    # render the active tmp_info
     output[[paste0("info",i)]] <- renderUI({
-      if(isKnitted()) {
-        withMathJax(includeMarkdown(filepath()))
-      }
+      withMathJax(includeMarkdown(tmp_infos[util$curinfo]))
     })
   }
   
   # render all demos
   for(d in 1:ndemos) {
     
-    # render the active demo md if it is knitted
+    # render the active temp_demo if it is knitted
     output[[paste0("demo",d)]] <- renderUI({
-      if(isKnitted()) {
-        withMathJax(includeMarkdown(filepath()))
+      if(demoKnitted()) {
+        withMathJax(includeMarkdown(tmp_demos[ex$cur]))
       }
     })
     
   }
   
-  
-  
-  # React to the code inputs
-
+  # code from user
   code <- reactive({
-    tryCatch(parse(text=input$code),error=function(e) NULL)
+    tryCatch(parse(text=input[[paste0("code",ex$cur)]]),
+             error=function(e) NULL)
   })
-
+  
+  # enviroments where to evaluate code inputs 
+  envs <- lapply(1:ndemos,new.env)
+  
   answer <- reactive({
-    testEnv <- new.env()
-    testEval <- eval(code(),env=testEnv)
-    get0("ans",testEnv,inherits=F)
+    if(!is.null(code())) {
+      testEval <- eval(code(),envir=envs[[ex$cur]])
+      get0("ans",envir=envs[[ex$cur]],inherits=F)
+    } else {NULL}
   })
-
-  observeEvent(input$execute, {
-
-    # execute the code
-    type <- isolate(input$codetype)
+  
+  # user code input execution
+  
+  execute_code <- observeEvent(input[[paste0("execute",ex$cur)]], {
+    
+    type <- isolate(input[[paste0("codetype",ex$cur)]])
     code <- isolate(code())
-    output[[type]] <- switch(type,
-                             "plot" =  renderPlot({eval(code,envir=.GlobalEnv)}),
-                             "text" =  renderPrint({eval(code,envir=.GlobalEnv)})
+    
+    output[[paste0(type,ex$cur)]] <- switch(type,
+                                            "plot" =  renderPlot({eval(code,
+                                                                       envir=envs[[ex$cur]])}),
+                                            "text" =  renderPrint({eval(code,
+                                                                        envir=envs[[ex$cur]])})
     )
+    
   })
-
-  # check answer
-  answer_feedback <- eventReactive(input$execute,{
-
-    if(!is.null(answer())){
-      results <-  checkAnswer(answer(), dontlook[[ex$cur]])
-      ex$total <- ex$total + results$points
-      feedback <- results$feedback
-    } else {
-      feedback <- ""
-    }
-    feedback
-  })
-
+  
+  
+  # give_feedback <-  observe({
+  # 
+  #   if(!is.null(answer())){
+  #     print("found answer")
+  #     correct <- do.call(dontlook[[ex$cur]],mydata)
+  #     print(correct)
+  #     results <-  checkAnswer(answer(), correct)
+  #     ex$total <- ex$total + results$points
+  #     ex$feedback <- results$feedback
+  #   } else {ex$feedback <- NULL}
+  # 
+  # })
+  # 
   # give feedback
-  output$feedback <- renderText({answer_feedback()})
-
+  for(f in 1:ndemos) {
+    output[[paste0("feedback",f)]] <- renderText({
+      ex$feedback})
+  }
+  
   
   # cleanup on exit
-  onSessionEnded <- session$onSessionEnded(function() {
+  onSessionEnd <- session$onSessionEnded(function() {
     nfiles <- ndemos + ninfo
     do.call(file.remove,list(list.files("figure",full.names = T)))
-    do.call(file.remove,list(paste0("temp_mdfile",1:nfiles,".md")))
+    tryCatch(do.call(file.remove,
+                     list(paste0("tmp_demo",1:ndemos,".md"))), 
+             error=function(e) silent(NULL))
+    tryCatch(do.call(file.remove,
+                     list(paste0("tmp_info",1:ninfo,".md"))), 
+             error=function(e) silent(NULL))
+    
   })
   
 })

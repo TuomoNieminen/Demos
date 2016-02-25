@@ -43,11 +43,11 @@ Now that we have a factor, we can for example create a table to see how many val
 table(myFactor)
 ```
 
-As before, we can assign the output of `table()` to an object. We can then visualise the counts with `barplot()`. Let's choose a green color for the bars and give the plot a main title.
+We can use the `qplot()` function in the ggplot2 to draw a nice looking barplot. First we tell R that we want to use the ggplot2 library. We only need to do this once per session to have access all to the functions of the library.
 
 ```{r}
-myTable <- table(myFactor)
-barplot(myTable, col="green", main="my barplot")
+library(ggplot2)
+qplot(myFactor, main="My plot")
 ```
 
 ### Exercise 2
@@ -57,11 +57,14 @@ Now let's get you back to your own data!
 1. Use `str()` to find out which variable in mydata is categorical
 2. Create a table of that variable
 3. Store your table for further use
-4. Draw a barplot of your categorical variable
+4. Draw a barplot of your categorical variable with `qplot()`
 
 <br>
 
 ```{r, include=FALSE, echo=FALSE}
 # correct answer. echo=FALSE means that this code will not be displayed.
-dontlook[[2]] <<- function(x) barplot(table(x[,2]))
+dontlook[[2]] <<- function(x) {
+  factor_var <- x[,sapply(x,is.factor)]
+  qplot(factor_var)
+}
 ```

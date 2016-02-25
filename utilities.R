@@ -46,7 +46,7 @@ get_playGround <- function(i) {
       ),
       conditionalPanel(
         condition=paste0("input.codetype",i,"=='plot'"),
-        plotOutput(paste0("plot",i))
+        plotOutput(paste0("plot",i),width="60%",height="250px")
       )
       
   )
