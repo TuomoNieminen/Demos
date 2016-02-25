@@ -1,5 +1,3 @@
-# Introstat exercises - type 2
-
 # UI for The Playground
 # the playground user interface includes:
 
@@ -11,34 +9,33 @@
 
 
 div(class="intro-playground",
-  
-  # code input
-  div(tags$textarea(id="code",
-                    rows=5, cols=90,
-                    "# write any (R) code here \n \n")),
-  
-  # code type choice, execution btn, feedback
-  
-  fluidRow(
-    column(2,          
-           # code execution
-           actionButton("execute","Go!")
-    ),
-    column(4,
-           # code type
-           radioButtons("codetype",
-                        label = "Choose output type",
-                        choices = list("numeric / basic print" = "text",
-                                       "plot" = "plot",
-                                       "table" = "table"),
-                        selected = "text")
-    ),
     
-    column(6,
-           br(),
-           htmlOutput("feedback")
-           )
-  ),
+    # code input
+    div(tags$textarea(id="code",
+                      rows=5, cols=90,
+                      "# write any (R) code here \n \n")),
+    
+    # code type choice, execution btn, feedback
+    
+    fluidRow(
+      column(2,          
+             # code execution
+             actionButton("execute","Go!")
+      ),
+      column(4,
+             # code type
+             radioButtons("codetype",
+                          label = "Choose output type",
+                          choices = list("basic" = "text",
+                                         "plot" = "plot"),
+                          selected = "text")
+      ),
+      
+      column(6,
+             br(),
+             htmlOutput("feedback")
+      )
+    ),
     
     # output
     
@@ -49,10 +46,6 @@ div(class="intro-playground",
     conditionalPanel(
       condition="input.codetype=='plot'",
       plotOutput("plot")
-    ),
-    conditionalPanel(
-      condition="input.codetype=='table'",
-      tableOutput("table")
     )
     
-  )
+)

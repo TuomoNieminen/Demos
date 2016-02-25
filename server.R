@@ -45,7 +45,7 @@ shinyServer(function(input, output, session) {
   
   # filepath where to knit the active file
   filepath <- reactive({
-    paste0("knitted/file",ex$active,".md")
+    paste0("temp_mdfile",ex$active,".md")
   })
   
   # knit the active file
@@ -78,64 +78,56 @@ shinyServer(function(input, output, session) {
         withMathJax(includeMarkdown(filepath()))
       }
     })
+    
   }
   
-  # render welcome
-  
-  # output[["welcome"]] <- renderUI({
-  #   welcomepath <- "knitted/welcome.md"
-  #   knit("demos/welcome.rmd",output=welcomepath)
-  #   if(file.exists(welcomepath)) {
-  #     withMathJax(includeMarkdown(welcomepath))
-  #   }
-  # })
-
   
   
   # React to the code inputs
-  
+
   code <- reactive({
     tryCatch(parse(text=input$code),error=function(e) NULL)
   })
-  
+
   answer <- reactive({
     testEnv <- new.env()
     testEval <- eval(code(),env=testEnv)
     get0("ans",testEnv,inherits=F)
   })
-  
+
   observeEvent(input$execute, {
-    
+
     # execute the code
     type <- isolate(input$codetype)
     code <- isolate(code())
     output[[type]] <- switch(type,
                              "plot" =  renderPlot({eval(code,envir=.GlobalEnv)}),
                              "text" =  renderPrint({eval(code,envir=.GlobalEnv)})
-    )  
+    )
   })
-  
+
   # check answer
   answer_feedback <- eventReactive(input$execute,{
-    
+
     if(!is.null(answer())){
       results <-  checkAnswer(answer(), dontlook[[ex$cur]])
       ex$total <- ex$total + results$points
       feedback <- results$feedback
     } else {
       feedback <- ""
-    }  
+    }
     feedback
   })
-  
+
   # give feedback
   output$feedback <- renderText({answer_feedback()})
+
   
   # cleanup on exit
-  
   onSessionEnded <- session$onSessionEnded(function() {
+    nfiles <- ndemos + ninfo
     do.call(file.remove,list(list.files("figure",full.names = T)))
-    do.call(file.remove,list(list.files("knitted",full.names = T)))
+    do.call(file.remove,list(paste0("temp_mdfile",1:nfiles,".md")))
   })
   
 })

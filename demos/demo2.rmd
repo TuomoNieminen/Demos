@@ -1,5 +1,5 @@
 
-### Know your variables
+### Know your objects
 
 <br>
 

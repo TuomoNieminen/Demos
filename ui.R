@@ -53,9 +53,6 @@ shinyUI(fluidPage(
       conditionalPanel(condition="(input.start + input.back)%2 != 0",
                        
                        
-                       
-                       
-                       
                        br(),
                        div(class="intro-nav-btn",actionButton("back", "Home")),
                        br(),
@@ -78,11 +75,11 @@ shinyUI(fluidPage(
                                  
                                  lapply(1:ndemos, function(d) {
                                    name <- paste("demo",d)
-                                   id <- paste0("demo",d)
-                                   tabPanel(name,uiOutput(id),value=d+ninfo)
+                                   demoUI <- uiOutput(paste0("demo",d))
+                                   playUI <- get_playGround(d)
+                                   args <- list(title=name,demoUI,playUI,value=d+ninfo)
+                                   do.call(tabPanel,args)
                                  }))),
-                       #source("playground.R", local=T)$value
-                       
                        
                        
                        div(id="intro-footer",
