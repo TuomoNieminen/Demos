@@ -63,14 +63,23 @@ shinyUI(fluidPage(
                        do.call(navlistPanel,
                                
                                #arguments
-                               c(list(id="demonav",widths=c(3,9)),
+                               c(list(id="intro_nav",widths=c(3,9)),
+                                 
+                                 # about   
+                                 list("About"),
+                                      lapply(1:ninfo, function(i) {
+                                        name <- paste("info",i)
+                                        id <- paste0("info",i)
+                                        tabPanel(name,uiOutput(id),value=i)
+                                      }),
                                  
                                  #demos       
                                  list("Demos"),
                                  
                                  lapply(1:ndemos, function(d) {
-                                   name <- paste0("demo",d)
-                                   tabPanel(name,uiOutput(name),value=d)
+                                   name <- paste("demo",d)
+                                   id <- paste0("demo",d)
+                                   tabPanel(name,uiOutput(id),value=d+ninfo)
                                  }))),
                        #source("playground.R", local=T)$value
                        

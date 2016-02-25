@@ -38,25 +38,36 @@ shinyServer(function(input, output, session) {
   
   #  Demos
   
-  # which demo is the active one
+  # which nav is the active one
   active <- observe({
-    ex$active <- as.numeric(input$demonav)
+    ex$active <- as.numeric(input$intro_nav)
   },priority=0)
   
-  # filepath where to knit the active demo
-  demofilepath <- reactive({
-    paste0("knitted/demo",ex$active,".md")
+  # filepath where to knit the active file
+  filepath <- reactive({
+    paste0("knitted/file",ex$active,".md")
   })
   
-  # knit the active demo
-  knitDemo <- observe({
-    knit(rmdfiles[ex$active], output=demofilepath(),quiet = T)
+  # knit the active file
+  knitFile <- observe({
+    knit(files[ex$active], output=filepath(),quiet = T)
   },priority=1)
   
-  # check if the active demo file is knitted
+  # check if the active file is knitted
   isKnitted <- reactive({
-    file.exists(demofilepath())
+    file.exists(filepath())
   })
+  
+  # render all infos
+  for(i in 1:ninfo) {
+    
+    # render the active demo md if it is knitted
+    output[[paste0("info",i)]] <- renderUI({
+      if(isKnitted()) {
+        withMathJax(includeMarkdown(filepath()))
+      }
+    })
+  }
   
   # render all demos
   for(d in 1:ndemos) {
@@ -64,7 +75,7 @@ shinyServer(function(input, output, session) {
     # render the active demo md if it is knitted
     output[[paste0("demo",d)]] <- renderUI({
       if(isKnitted()) {
-        withMathJax(includeMarkdown(demofilepath()))
+        withMathJax(includeMarkdown(filepath()))
       }
     })
   }

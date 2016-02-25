@@ -1,0 +1,26 @@
+### Welcome!  
+  
+In this tutorial you will use the R language to perform basic data analysis tasks. there are 2 demos, each containing an exercise.
+
+#### Basic information
+ 
+Each demo contains examples and an exercise. In the exercises you will get to instantly apply the examples given, using your own personal dataset. This dataset is called mydata. mydata is a data frame containing your variables. Don't worry if the term data frame sounds strange, it is merely a kind of table.
+
+During each exercise, you will perform a small task using the R program. In R you create things, called *objects*, by a process called assignment. You can then operate on objects using *functions*. Let's look at how to create an object by assigning a value to it.
+
+
+```r
+myHello <- "Hi there"
+```
+
+Here we use the assign operator `<-`, which consist of two characters: a less than sign ("<") and a minus sign ("-"). We have now defined and stored an object called `myHello`. We can for example access it's value by printing it, which is done simply by giving it's name and giving an execution command. ("Enter" key on R console, "ctrl"+"Enter" on an R studio R script).
+
+
+```r
+myHello
+```
+
+```
+## [1] "Hi there"
+```
+
