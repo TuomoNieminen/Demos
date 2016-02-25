@@ -11,7 +11,7 @@ library(shiny)
 
 source("utilities.R")
 
-shinyServer(function(input, output,session) {
+shinyServer(function(input, output, session) {
   
   ex <- reactiveValues(active=1,results = NULL, total=0)
   
@@ -38,12 +38,12 @@ shinyServer(function(input, output,session) {
   
   #  Demos
   
-  # active demo
+  # which demo is the active one
   active <- observe({
     ex$active <- as.numeric(input$demonav)
-  })
+  },priority=0)
   
-  # filepath to knit the active demo to
+  # filepath where to knit the active demo
   demofilepath <- reactive({
     paste0("knitted/demo",ex$active,".md")
   })
@@ -51,18 +51,34 @@ shinyServer(function(input, output,session) {
   # knit the active demo
   knitDemo <- observe({
     knit(rmdfiles[ex$active], output=demofilepath(),quiet = T)
+  },priority=1)
+  
+  # check if the active demo file is knitted
+  isKnitted <- reactive({
+    file.exists(demofilepath())
   })
   
   # render all demos
-  
   for(d in 1:ndemos) {
     
+    # render the active demo md if it is knitted
     output[[paste0("demo",d)]] <- renderUI({
-      if(file.exists(demofilepath())) {
-      withMathJax(includeMarkdown(demofilepath()))
+      if(isKnitted()) {
+        withMathJax(includeMarkdown(demofilepath()))
       }
     })
   }
+  
+  # render welcome
+  
+  # output[["welcome"]] <- renderUI({
+  #   welcomepath <- "knitted/welcome.md"
+  #   knit("demos/welcome.rmd",output=welcomepath)
+  #   if(file.exists(welcomepath)) {
+  #     withMathJax(includeMarkdown(welcomepath))
+  #   }
+  # })
+
   
   
   # React to the code inputs
@@ -103,5 +119,12 @@ shinyServer(function(input, output,session) {
   
   # give feedback
   output$feedback <- renderText({answer_feedback()})
+  
+  # cleanup on exit
+  
+  onSessionEnded <- session$onSessionEnded(function() {
+    do.call(file.remove,list(list.files("figure",full.names = T)))
+    do.call(file.remove,list(list.files("knitted",full.names = T)))
+  })
   
 })

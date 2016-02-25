@@ -44,6 +44,7 @@ shinyUI(fluidPage(
                            actionButton("start","Ok, I'm ready!"),
                            br()
                        ))
+                   
   ),
   #wrapper
   div(class="intro-wrapper",
@@ -63,25 +64,25 @@ shinyUI(fluidPage(
                                
                                #arguments
                                c(list(id="demonav",widths=c(3,9)),
-                                      
-                               #demos       
-                                      list("Demos"),
-                               
-                                      lapply(1:ndemos, function(d) {
-                                        name <- paste0("demo",d)
-                                        tabPanel(name,uiOutput(name),value=d)
-                                      }))),
-                               #source("playground.R", local=T)$value
-                               
-                               
-                               
-                               div(id="intro-footer",
-                                   p("@hy Tuomo A. Nieminen"),
-                                   p("tuomo.a.nieminen (at) helsinki (dot) fi")
-                               )
-                               
-                               
-                       ))
-      
-      
-  ))
+                                 
+                                 #demos       
+                                 list("Demos"),
+                                 
+                                 lapply(1:ndemos, function(d) {
+                                   name <- paste0("demo",d)
+                                   tabPanel(name,uiOutput(name),value=d)
+                                 }))),
+                       #source("playground.R", local=T)$value
+                       
+                       
+                       
+                       div(id="intro-footer",
+                           p("@hy Tuomo A. Nieminen"),
+                           p("tuomo.a.nieminen (at) helsinki (dot) fi")
+                       )
+                       
+                       
+      ))
+  
+  
+))
